@@ -37,10 +37,8 @@ export default function SelectedRecipe({ selectedRecipeId, setSelectedRecipeId, 
             <p><strong>Meal:</strong>{recipe.strMeal}</p>
             <p><strong>Cuisine Type:</strong> {recipe.strArea}</p>
             <p><strong>Ingredients:</strong> {recipe.ingredients}</p>
-            <p><strong>Last Flight:</strong> {recipe}</p>
-            <p><strong>Space-walk Count:</strong> {recipe}</p>
-            <p><strong>Status:</strong> {recipe}</p>
-            <p><strong>Time in Space:</strong> {recipe}</p>
+            <p><strong>Instructions:</strong> {recipe.strInstructions}</p>
+            <p><strong>Cook along with YouTube:</strong> {recipe.strYoutube}</p>
             <div className="back-button">
                 <button onClick={handleBack}>Back to Astronauts</button>
             </div>
