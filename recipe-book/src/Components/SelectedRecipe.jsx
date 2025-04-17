@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom";
 //will show the selected recipe with directions, possible button to add to favorites here vs recipe list? await fetch using ID
 
 
 export default function SelectedRecipe({ selectedRecipeId, setSelectedRecipeId, setView }) {
     const [recipe, setRecipe] = useState()
+    const navigate = useNavigate();
 
     useEffect(() => {
+        if (!selectedRecipeId)
+            return;
         async function fetchRecipes() {
             try {
                 const response = await fetch(
@@ -23,30 +27,27 @@ export default function SelectedRecipe({ selectedRecipeId, setSelectedRecipeId, 
 
     const handleBack = () => {
         setSelectedRecipeId(null);  // Resets selected recipes
-        setView("recipes");  // Switches view back to recipes list
+        navigate("/RecipeList")
     };
-    return
-    <>
-    <div className="selected-recipe">
-        {recipe && (
-            <img
+    return (
+        <>
+          <div className="selected-recipe">
+            {recipe && (
+              <img
                 src={recipe.strMealThumb || "/public/AdobeStock_581847170.png"}
-                onError={(e) => e.target.src = "/public/AdobeStock_581847170.png"}
+                onError={(e) => (e.target.src = "/public/AdobeStock_581847170.png")}
                 alt={recipe.meal}
-            />
-        )}
-        <div className="recipe-details">
-
-            <p><strong>Meal:</strong>{recipe.strMeal}</p>
-            <p><strong>Cuisine Type:</strong> {recipe.strArea}</p>
-            <p><strong>Ingredients:</strong> {recipe.ingredients}</p>
-            <p><strong>Instructions:</strong> {recipe.strInstructions}</p>
-            <p><strong>Cook along with YouTube:</strong> {recipe.strYoutube}</p>
-            <div className="back-button">
+              />
+            )}
+            <div className="recipe-details">
+              <p><strong>Meal:</strong> {recipe?.strMeal}</p>
+              <p><strong>Cuisine Type:</strong> {recipe?.strArea}</p>
+              <p><strong>Ingredients:</strong> {recipe?.ingredients?.join(", ")}</p>
+              <p><strong>Instructions:</strong> {recipe?.strInstructions}</p>
+              <div className="back-button">
                 <button onClick={handleBack}>Back to Recipe Home</button>
+              </div>
             </div>
-
-        </div>
-    </div>
-    </> 
-}
+          </div>
+        </>
+      ) }
