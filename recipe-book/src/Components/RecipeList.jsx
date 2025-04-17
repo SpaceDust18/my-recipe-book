@@ -1,11 +1,13 @@
 import RecipeRow from "./RecipeRow.jsx"
-import { useEffect, useState } from "react"
+import React, { useState } from "react"
+import { useEffect } from "react"
 
 
 
-export default function RecipeList() {
-    const [recipes, setRecipes] = useState([])
-
+export default function RecipeList({ setSelectedRecipeId, recipes, setRecipes }) {
+    function handleFavorite(recipe) {
+        console.log("Adding to Favorites:", recipe.strMeal)
+    }
     useEffect(() => {
         async function fetchRecipes() {
             try {
@@ -21,12 +23,17 @@ export default function RecipeList() {
         }
         fetchRecipes()
     }, [])
-
+function handleFavorite(recipe) {
+    console.log("Add to Favorites:", recipe);
+}
+    function handleMoreInfo(id) {
+        setSelectedRecipeId(id);
+    }
     return (
         <>
             <div className="recipe-list">
                 {recipes && recipes.map((recipe) => (
-                    <RecipeRow key={recipe.idMeal} recipe={recipe} />
+                    <RecipeRow key={recipe.idMeal} recipe={recipe} setSelectedRecipeId={setSelectedRecipeId} handleFavorite={handleFavorite} handleMoreInfo={handleMoreInfo}/>
                 )
                 )}
 
