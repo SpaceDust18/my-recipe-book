@@ -1,47 +1,59 @@
-import RecipeRow from "./RecipeRow.jsx"
-import React, { useState } from "react"
-import { useEffect } from "react"
-import { useNavigate } from "react-router-dom" 
+import RecipeRow from "./RecipeRow.jsx";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-export default function RecipeList({ setSelectedRecipeId, recipes, setRecipes }) {
-    const navigate = useNavigate();
-    function handleFavorite(recipe) {
-        console.log("Adding to Favorites:", recipe.strMeal);
+export default function RecipeList({ setSelectedRecipeId, recipes, setRecipes, token, handleMoreInfo }) {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    async function fetchRecipes() {
+      try {
+        const response = await fetch("https://fsa-recipe.up.railway.app/api/recipes");
+        const data = await response.json();
+        setRecipes(data);
+        console.log(data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    fetchRecipes();
+  }, [setRecipes]);
+
+  function handleFavorite(recipe) {
+    if (!token) {
+      alert("You must be logged in to add a recipe to your favorites.");
+      return;
     }
 
-    useEffect(() => {
-        async function fetchRecipes() {
-            try {
-                const response = await fetch("https://fsa-recipe.up.railway.app/api/recipes");
-                const data = await response.json();
-                setRecipes(data);
-                console.log(data);
-            } catch (error) {
-                console.error(error);
-            }
-        }
-        fetchRecipes();
-    }, []);
+    // Get current favorites from localStorage or initialize as empty array
+    const existingFavorites = JSON.parse(localStorage.getItem("favoriteRecipes")) || [];
 
-    function handleMoreInfo(idMeal) {
-        setSelectedRecipeId(idMeal);
-        navigate(`/SelectedRecipe/${idMeal}`)
+    // Check if the recipe is already in favorites
+    const alreadyFavorited = existingFavorites.some((fav) => fav.idMeal === recipe.idMeal);
+
+    if (!alreadyFavorited) {
+      const updatedFavorites = [...existingFavorites, recipe];
+      localStorage.setItem("favoriteRecipes", JSON.stringify(updatedFavorites));
+      alert(`${recipe.strMeal} added to your favorites!`);
+    } else {
+      alert("This recipe is already in your favorites.");
     }
 
-    return (
-        <>
+    navigate("/FavoriteRecipe");
+  }
 
-            <div className="recipe-list">
-                {recipes &&
-                    recipes.map((recipe) => (
-                        <RecipeRow
-                        key={recipe.idMeal}
-                        recipe={recipe}
-                        handleFavorite={handleFavorite}
-                        handleMoreInfo={() => handleMoreInfo(recipe.idMeal)} 
-                      />
-                    ))}
-            </div>
-        </>
-    );
+  return (
+    <div className="recipe-list">
+      {recipes?.map((recipe) =>
+        recipe && recipe.strMeal ? (
+          <RecipeRow
+            key={recipe.idMeal}
+            recipe={recipe}
+            handleFavorite={() => handleFavorite(recipe)}
+            handleMoreInfo={() => handleMoreInfo(recipe.idMeal)}
+          />
+        ) : null
+      )}
+    </div>
+  );
 }

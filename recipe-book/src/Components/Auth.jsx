@@ -1,27 +1,34 @@
-import { useEffect, useState } from 'react'
-//fetch and GET
-export default function Auth({ token }) {
+import { useEffect } from 'react';
+
+export default function Auth({ token, setToken, setAuthUser }) {
     useEffect(() => {
-        if (token) {
-            handleCheck();
-        }
-    }, [token]);
+        async function handleCheck() {
+            try {
+                const response = await fetch("https://fsa-recipe.up.railway.app/api/auth/me", {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}` 
+                    }
+                });
 
+                const data = await response.json();
 
-    async function handleCheck() {
-        try {
-            const response = await fetch('https://fsa-recipe.up.railway.app/api/auth/register', {
-                headers: {
-                    Authorization: `Bearer ${token}`,
+                if (data.error) {
+                    console.error("Auth error:", data.error);
+                    setToken(null); 
+                    localStorage.removeItem("authToken"); 
+                } else {
+                    setAuthUser(data); 
                 }
-            });
-        const result = await response.json()
-if (result.error) {
-    setToken(null);
-}
-        }catch (error) {
-console.error('Auth check failed:' , error);
-    }
-    }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+            }
+        }
+
+        if (token) {
+            handleCheck(); 
+        }
+    }, [token, setToken, setAuthUser]);
+
     return null; 
 }

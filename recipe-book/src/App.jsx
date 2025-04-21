@@ -1,35 +1,156 @@
-import { useState } from 'react'
-import './App.css'
-import LogIn from './Components/LogIn.jsx'
-import Auth from './Components/Auth.jsx'
-import RecipeList from './Components/RecipeList.jsx'
-import SelectedRecipe from './Components/SelectedRecipe.jsx'
-import FavoriteRecipe from './Components/FavoriteRecipe.jsx'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { useState, useEffect } from "react";
+import "./App.css";
+import LogIn from "./Components/LogIn";
+import Auth from "./Components/Auth";
+import RecipeList from "./Components/RecipeList";
+import SelectedRecipe from "./Components/SelectedRecipe";
+import FavoriteRecipe from "./Components/FavoriteRecipe";
+import NavBar from "./Components/NavBar";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import Register from "./Components/Register";
+import RecipeRow from "./Components/RecipeRow";
+import RecipeCard from "./Components/RecipeCard";
 
 export default function App() {
-  const [token, setToken] = useState(null)
-  const [recipes, setRecipes] = useState([])
-  const [selectedRecipeId, setSelectedRecipeId] = useState(null)
-  const [favRecipe, setFavRecipe] = useState(null)
-  const [view, setView] = useState("recipes")
+  const [token, setToken] = useState(localStorage.getItem("authToken"));
+  const [authUser, setAuthUser] = useState(() => {
+    const userData = localStorage.getItem("user");
+    try {
+      return userData ? JSON.parse(userData) : null;
+    } catch (e) {
+      console.error("Failed to parse from localStorage", e);
+      return null;
+    }
+  });
+  const [recipes, setRecipes] = useState([]);
+  const [selectedRecipeId, setSelectedRecipeId] = useState(null);
+  const [view, setView] = useState("recipes");
+  const [recipe, setRecipe] = useState(null);
 
-  //general settings with functions to pass to several components. Probably Routes
+  const navigate = useNavigate();
+
+  const handleLogOut = () => {
+    localStorage.removeItem("authToken");
+    setToken(null);
+    setAuthUser(null);
+  };
+
+  const handleAddToFavorites = (recipe) => {
+    console.log("Favoriting recipe:", recipe);
+  };
+
+  const handleBack = () => {
+    navigate("/");
+  };
+
+  useEffect(() => {
+    console.log("Token from localStorage:", token);
+    console.log("User from localStorage:", authUser);
+
+    console.log("Token and user:", token, authUser);
+    if (token && authUser) {
+      console.log("user is already logged in", authUser);
+    }
+  }, [token, authUser]);
+
+  useEffect(() => {
+    // If we have a token but no user, we try to rehydrate from localStorage
+    if (token && !authUser) {
+      const userData = localStorage.getItem("user");
+      try {
+        const parsedUser = userData ? JSON.parse(userData) : null;
+        if (parsedUser) {
+          console.log("Rehydrating user from localStorage:", parsedUser);
+          setAuthUser(parsedUser);
+        }
+      } catch (e) {
+        console.error("Failed to rehydrate user from localStorage", e);
+      }
+    }
+  }, [token, authUser]);
+
+  useEffect(() => {
+    if (selectedRecipeId) {
+      const selectedRecipe = recipes.find((r) => r.idMeal === selectedRecipeId);
+      setRecipe(selectedRecipe || null);
+    }
+  }, [selectedRecipeId, recipes]);
+
+  function handleMoreInfo(idMeal) {
+    setSelectedRecipeId(idMeal);
+    navigate(`/SelectedRecipe/${idMeal}`);
+  }
+
   return (
     <>
+      <Auth token={token} setToken={setToken} setAuthUser={setAuthUser} />
+      <NavBar
+        token={token}
+        setToken={setToken}
+        authUser={authUser}
+        setAuthUser={setAuthUser}
+        handleLogOut={handleLogOut}
+      />
 
-      <Auth token={token} />
+      <RecipeRow token={token} 
+      handleMoreInfo={() => handleMoreInfo(recipe.idMeal)}/>
 
       <div id="main-section">
         <Routes>
           <Route path="/" element={<Navigate to="/RecipeList" />} />
-          <Route path="/RecipeList" element={<RecipeList recipes={recipes} setRecipes={setRecipes} setSelectedRecipeId={setSelectedRecipeId}/>} />
-          <Route path="/SelectedRecipe/:id" element={<SelectedRecipe selectedRecipeId={selectedRecipeId} setView={setView} setSelectedRecipeId={setSelectedRecipeId}/>} />
-          <Route path="/FavoriteRecipe" element={<FavoriteRecipe />} />
+          <Route
+            path="/Register"
+            element={<Register setToken={setToken} setAuthUser={setAuthUser} />}
+          />
+          <Route
+            path="/RecipeList"
+            element={
+              <RecipeList
+                token={token}
+                setToken={setToken}
+                authUser={authUser}
+                handleAddToFavorites={handleAddToFavorites}
+                recipes={recipes}
+                setRecipes={setRecipes}
+                setSelectedRecipeId={setSelectedRecipeId}
+                setRecipe={setRecipe}
+                handleMoreInfo={handleMoreInfo}
+              />
+            }
+          />
+          <Route
+            path="/SelectedRecipe/:id"
+            element={
+              <SelectedRecipe
+                selectedRecipeId={selectedRecipeId}
+                setView={setView}
+                setSelectedRecipeId={setSelectedRecipeId}
+                handleMoreInfo={handleMoreInfo}
+              />
+            }
+          />
+          <Route
+            path="/LogIn"
+            element={
+              <LogIn
+                setToken={setToken}
+                setAuthUser={setAuthUser}
+                handleBack={handleBack}
+              />
+            }
+          />
+          <Route
+            path="/FavoriteRecipe"
+            element={
+              token && authUser ? (
+                <FavoriteRecipe token={token} recipe={recipe} handleMoreInfo={handleMoreInfo} setSelectedRecipeId={setSelectedRecipeId}/>
+              ) : (
+                <Navigate to="/LogIn" replace />
+              )
+            }
+          />
         </Routes>
       </div>
-
     </>
-  )
+  );
 }
-
