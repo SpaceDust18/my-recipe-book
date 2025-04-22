@@ -16,9 +16,10 @@ export default function App() {
   const [authUser, setAuthUser] = useState(() => {
     const userData = localStorage.getItem("user");
     try {
-      return userData ? JSON.parse(userData) : null;
+      if (!userData || userData === "undefined") return null;
+      return JSON.parse(userData);
     } catch (e) {
-      console.error("Failed to parse from localStorage", e);
+      console.error("Failed to parse user from localStorage", e);
       return null;
     }
   });
@@ -57,6 +58,9 @@ export default function App() {
     // If we have a token but no user, we try to rehydrate from localStorage
     if (token && !authUser) {
       const userData = localStorage.getItem("user");
+      if (userData === "undefined") {
+        localStorage.removeItem("user")
+      }
       try {
         const parsedUser = userData ? JSON.parse(userData) : null;
         if (parsedUser) {
@@ -92,8 +96,8 @@ export default function App() {
         handleLogOut={handleLogOut}
       />
 
-      <RecipeRow token={token} 
-      handleMoreInfo={() => handleMoreInfo(recipe.idMeal)}/>
+      <RecipeRow token={token}
+        handleMoreInfo={() => handleMoreInfo(recipe.idMeal)} />
 
       <div id="main-section">
         <Routes>
@@ -139,13 +143,22 @@ export default function App() {
               />
             }
           />
+
+          <Route
+            path="/RecipeCard"
+            element={
+              <RecipeCard recipe={recipe}
+              />
+            }
+          />
+
           <Route
             path="/FavoriteRecipe"
             element={
               token && authUser ? (
-                <FavoriteRecipe token={token} recipe={recipe} handleMoreInfo={handleMoreInfo} setSelectedRecipeId={setSelectedRecipeId}/>
+                <FavoriteRecipe token={token} recipe={recipe} handleMoreInfo={handleMoreInfo} setSelectedRecipeId={setSelectedRecipeId} />
               ) : (
-                <Navigate to="/LogIn" replace />
+                <Navigate to="/FavoriteRecipe" replace />
               )
             }
           />

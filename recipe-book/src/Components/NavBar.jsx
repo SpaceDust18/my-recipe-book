@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import "./NavBar.css"
 
 export default function Header({ token, authUser, setToken, setAuthUser }) {
   const navigate = useNavigate();

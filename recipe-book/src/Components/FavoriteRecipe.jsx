@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import RecipeCard from "./RecipeCard";
+import RecipeRow from "./RecipeRow";
 
 export default function FavoriteRecipe({ token, handleMoreInfo }) {
   const [favorites, setFavorites] = useState([]);
@@ -8,7 +9,6 @@ export default function FavoriteRecipe({ token, handleMoreInfo }) {
   useEffect(() => {
     const loadFavorites = async () => {
       try {
-        // Fetch backend favorites
         const response = await fetch("https://fsa-recipe.up.railway.app/api/favorites", {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -17,22 +17,19 @@ export default function FavoriteRecipe({ token, handleMoreInfo }) {
         const data = await response.json();
         console.log("Backend favorites:", data);
 
-        const backendData = data.data || [];
 
+        const backendData = data.data || [];
         setBackendFavorites(backendData);
 
-        // Load localStorage favorites
         const stored = JSON.parse(localStorage.getItem("favoriteRecipes")) || [];
 
-        // Convert backend format
         const backendConverted = backendData.map(fav => ({
           idMeal: fav.mealId,
           strMeal: fav.name,
           strMealThumb: fav.imageUrl,
-          favoriteId: fav.id
+          favoriteId: fav.id,
         }));
 
-        //Merge without duplicates
         const merged = [...backendConverted];
         stored.forEach(recipe => {
           if (!merged.some(r => r.idMeal === recipe.idMeal)) {
@@ -65,6 +62,7 @@ export default function FavoriteRecipe({ token, handleMoreInfo }) {
           mealId: recipe.idMeal,
           name: recipe.strMeal,
           imageUrl: recipe.strMealThumb,
+          strArea: recipe.strArea
         }),
       });
 
@@ -140,19 +138,18 @@ export default function FavoriteRecipe({ token, handleMoreInfo }) {
   return (
     <div>
       <h2>Your Favorite Recipes</h2>
+      
       {favorites
-        .filter(recipe => recipe && recipe.idMeal) //filters out undefined/broken entries
+        .filter(recipe => recipe && recipe.idMeal)
         .map((recipe) => (
           <div key={recipe.favoriteId || recipe.idMeal} style={{ marginBottom: "20px" }}>
             <RecipeCard recipe={recipe} />
 
-            <div>
-              {!backendFavorites.some(fav => fav.mealId === recipe.idMeal) && (
-                <button onClick={() => handleAddToFavoritesAPI(recipe)}>
-                  Save to My Account
-                </button>
-              )}
-            </div>
+            {!recipe.favoriteId && (
+              <button onClick={() => handleAddToFavoritesAPI(recipe)}>
+                Save to My Account
+              </button>
+            )}
 
             <button
               onClick={() => {
@@ -166,6 +163,7 @@ export default function FavoriteRecipe({ token, handleMoreInfo }) {
             </button>
 
             <div>
+              
               <button onClick={() => handleMoreInfo(recipe.idMeal)}>
                 More Info
               </button>

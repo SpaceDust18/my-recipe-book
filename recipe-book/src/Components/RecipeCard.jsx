@@ -10,7 +10,7 @@ export default function RecipeCard({ recipe }) {
         style={{ width: "150px" }}
         onError={(e) => {
           e.target.onerror = null;
-          e.target.src = "./AdobeStock_581847170.png";
+          e.target.src = "/AdobeStock_581847170.png";
         }}
       />
     </div>

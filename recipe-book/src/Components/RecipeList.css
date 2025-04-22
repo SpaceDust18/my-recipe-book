@@ -1,0 +1,51 @@
+/* RecipeList.css */
+
+.recipe-list {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    gap: 1.5rem;
+    padding: 2rem;
+    background-color: #fdfdfb;
+    font-family: Georgia, serif;
+  }
+  
+  .recipe-row {
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    padding: 1rem;
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  .recipe-row:hover {
+    transform: scale(1.02);
+  }
+  
+  .recipe-row h3 {
+    font-size: 1.2rem;
+    color: #2e7d32;
+    margin-bottom: 0.5rem;
+  }
+  
+  .recipe-row img {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+  }
+  
+  .recipe-row button {
+    background-color: #a5d6a7;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    color: #2e7d32;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 0.5rem;
+  }
+  
+  .recipe-row button:hover {
+    background-color: #81c784;
+  }
+  

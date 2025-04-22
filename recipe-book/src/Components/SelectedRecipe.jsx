@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import RecipeRow from "./RecipeRow";
 import RecipeCard from "./RecipeCard";
 
 export default function SelectedRecipe({ selectedRecipeId, setSelectedRecipeId, setView }) {
-  const [recipe, setRecipe] = useState()
+  const [recipe, setRecipe] = useState(null)
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export default function SelectedRecipe({ selectedRecipeId, setSelectedRecipeId, 
     <>
  {recipe && (
         <div className="selected-recipe">
-          <RecipeCard recipe={recipe} />
+          <RecipeCard recipe={recipe} />         
           <div className="recipe-details">
             <p>{recipe?.strMeal}</p>
             <p><strong>Cuisine Type:</strong>

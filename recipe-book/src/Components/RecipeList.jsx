@@ -1,6 +1,7 @@
 import RecipeRow from "./RecipeRow.jsx";
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import "./RecipeList.css";
 
 export default function RecipeList({ setSelectedRecipeId, recipes, setRecipes, token, handleMoreInfo }) {
   const navigate = useNavigate();

@@ -8,12 +8,10 @@ export default function RecipeRow({ recipe, handleFavorite, handleMoreInfo }) {
 
             <RecipeCard recipe={recipe} />
             <strong>Cuisine Type:</strong><p>{recipe.strArea}</p>
-            <div>
-                <button onClick={handleMoreInfo}>More Info</button>
-            </div>
-            <div>
-                <button onClick={handleFavorite}>❤️ Favorite</button>
-            </div>
+
+            <button onClick={handleMoreInfo}>More Info</button>
+            <button onClick={handleFavorite}>❤️ Favorite</button>
+
         </div>
     );
 }
