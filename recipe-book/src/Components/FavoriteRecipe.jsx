@@ -8,7 +8,7 @@ export default function FavoriteRecipe({ token, handleMoreInfo }) {
   useEffect(() => {
     const loadFavorites = async () => {
       try {
-        // Fetches favorites from the backend
+        // Fetch backend favorites
         const response = await fetch("https://fsa-recipe.up.railway.app/api/favorites", {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -17,43 +17,44 @@ export default function FavoriteRecipe({ token, handleMoreInfo }) {
         const data = await response.json();
         console.log("Backend favorites:", data);
 
-        // Set backend favorites
-        setBackendFavorites(data.data || []);
+        const backendData = data.data || [];
 
-        // Load favorites from localStorage
+        setBackendFavorites(backendData);
+
+        // Load localStorage favorites
         const stored = JSON.parse(localStorage.getItem("favoriteRecipes")) || [];
 
-        // Combine both local and backend favorites
-        const combined = [...stored, ...data.data.map(fav => ({
+        // Convert backend format
+        const backendConverted = backendData.map(fav => ({
           idMeal: fav.mealId,
           strMeal: fav.name,
           strMealThumb: fav.imageUrl,
           favoriteId: fav.id
-        }))];
+        }));
 
-        // Deduplicate by idMeal
-        const deduplicated = Array.from(
-          new Map(combined.map(item => [item.idMeal, item])).values()
-        );
+        //Merge without duplicates
+        const merged = [...backendConverted];
+        stored.forEach(recipe => {
+          if (!merged.some(r => r.idMeal === recipe.idMeal)) {
+            merged.push(recipe);
+          }
+        });
 
-        setFavorites(deduplicated);
+        setFavorites(merged);
       } catch (err) {
-        console.error("Failed to load backend favorites", err);
+        console.error("Failed to load favorites", err);
       }
     };
-
     loadFavorites();
   }, [token]);
 
   const handleAddToFavoritesAPI = async (recipe) => {
     try {
-      // Check if recipe already exists in the backend favorites
-      if (backendFavorites.some(fav => fav.idMeal === recipe.idMeal)) {
+      if (backendFavorites.some(fav => fav.mealId === recipe.idMeal)) {
         alert(`${recipe.strMeal} is already in your favorites.`);
         return;
       }
 
-      // Adding to backend favorites
       const response = await fetch("https://fsa-recipe.up.railway.app/api/favorites", {
         method: "POST",
         headers: {
@@ -72,28 +73,26 @@ export default function FavoriteRecipe({ token, handleMoreInfo }) {
       if (response.ok) {
         alert(`${recipe.strMeal} was successfully synced to your account!`);
 
-        // Update backend favorites state
-        setBackendFavorites(prev => [...prev, {
+        const newBackendFavorite = {
           idMeal: recipe.idMeal,
           strMeal: recipe.strMeal,
           strMealThumb: recipe.strMealThumb,
           favoriteId: data.id,
-        }]);
+        };
 
-        // Add recipe to local storage if not already there
+        setBackendFavorites(prev => [...prev, { ...data, mealId: recipe.idMeal }]);
+
         const storedFavorites = JSON.parse(localStorage.getItem("favoriteRecipes")) || [];
         if (!storedFavorites.some(fav => fav.idMeal === recipe.idMeal)) {
           const updatedFavorites = [...storedFavorites, recipe];
           localStorage.setItem("favoriteRecipes", JSON.stringify(updatedFavorites));
         }
 
-        // Update local state favorites
-        setFavorites(prevFavorites => {
-          // Avoid duplicates in the local state as well
-          if (prevFavorites.some(fav => fav.idMeal === recipe.idMeal)) {
-            return prevFavorites;
+        setFavorites(prev => {
+          if (!prev.some(r => r.idMeal === recipe.idMeal)) {
+            return [...prev, newBackendFavorite];
           }
-          return [...prevFavorites, recipe];
+          return prev;
         });
       } else {
         alert(`Failed to add ${recipe.strMeal}: ${data.error}`);
@@ -125,13 +124,13 @@ export default function FavoriteRecipe({ token, handleMoreInfo }) {
     }
   };
 
-  // Handle local removal
   const handleRemoveFavorite = (idMeal) => {
-    const updatedFavorites = favorites.filter((recipe) => recipe.idMeal !== idMeal);
+    const updatedFavorites = favorites.filter(recipe => recipe.idMeal !== idMeal);
     setFavorites(updatedFavorites);
 
-    // Optionally update localStorage if you're keeping it in sync
-    localStorage.setItem("favoriteRecipes", JSON.stringify(updatedFavorites));
+    const stored = JSON.parse(localStorage.getItem("favoriteRecipes")) || [];
+    const updatedLocal = stored.filter(recipe => recipe.idMeal !== idMeal);
+    localStorage.setItem("favoriteRecipes", JSON.stringify(updatedLocal));
   };
 
   if (favorites.length === 0) {
@@ -144,23 +143,24 @@ export default function FavoriteRecipe({ token, handleMoreInfo }) {
       {favorites.map((recipe) => (
         <div key={recipe.favoriteId || recipe.idMeal} style={{ marginBottom: "20px" }}>
           <RecipeCard recipe={recipe} />
-          {/* Add buttons only if the recipe is not in the backend favorites */}
-          {!backendFavorites.some(fav => fav.idMeal === recipe.idMeal) && (
+
+          <div>
             <button onClick={() => handleAddToFavoritesAPI(recipe)}>
               Save to My Account
             </button>
-          )}
-          {/* Remove from favorites button */}
+          </div>
+
           <button
             onClick={() => {
-              handleRemoveFavorite(recipe.idMeal); // Remove from local favorites
+              handleRemoveFavorite(recipe.idMeal);
               if (recipe.favoriteId) {
-                handleRemoveFromFavoritesAPI(recipe.favoriteId); // Remove from backend API
+                handleRemoveFromFavoritesAPI(recipe.favoriteId);
               }
             }}
           >
             Remove from Favorites
           </button>
+
           <div>
             <button onClick={() => handleMoreInfo(recipe.idMeal)}>
               More Info

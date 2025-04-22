@@ -5,11 +5,13 @@ export default function RecipeRow({ recipe, handleFavorite, handleMoreInfo }) {
     if (!recipe) return null;
     return (
         <div className="recipe-row">
-           
-           <RecipeCard recipe={recipe} />
+
+            <RecipeCard recipe={recipe} />
             <strong>Cuisine Type:</strong><p>{recipe.strArea}</p>
             <div>
                 <button onClick={handleMoreInfo}>More Info</button>
+            </div>
+            <div>
                 <button onClick={handleFavorite}>❤️ Favorite</button>
             </div>
         </div>
