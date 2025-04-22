@@ -140,34 +140,38 @@ export default function FavoriteRecipe({ token, handleMoreInfo }) {
   return (
     <div>
       <h2>Your Favorite Recipes</h2>
-      {favorites.map((recipe) => (
-        <div key={recipe.favoriteId || recipe.idMeal} style={{ marginBottom: "20px" }}>
-          <RecipeCard recipe={recipe} />
+      {favorites
+        .filter(recipe => recipe && recipe.idMeal) //filters out undefined/broken entries
+        .map((recipe) => (
+          <div key={recipe.favoriteId || recipe.idMeal} style={{ marginBottom: "20px" }}>
+            <RecipeCard recipe={recipe} />
 
-          <div>
-            <button onClick={() => handleAddToFavoritesAPI(recipe)}>
-              Save to My Account
+            <div>
+              {!backendFavorites.some(fav => fav.mealId === recipe.idMeal) && (
+                <button onClick={() => handleAddToFavoritesAPI(recipe)}>
+                  Save to My Account
+                </button>
+              )}
+            </div>
+
+            <button
+              onClick={() => {
+                handleRemoveFavorite(recipe.idMeal);
+                if (recipe.favoriteId) {
+                  handleRemoveFromFavoritesAPI(recipe.favoriteId);
+                }
+              }}
+            >
+              Remove from Favorites
             </button>
-          </div>
 
-          <button
-            onClick={() => {
-              handleRemoveFavorite(recipe.idMeal);
-              if (recipe.favoriteId) {
-                handleRemoveFromFavoritesAPI(recipe.favoriteId);
-              }
-            }}
-          >
-            Remove from Favorites
-          </button>
-
-          <div>
-            <button onClick={() => handleMoreInfo(recipe.idMeal)}>
-              More Info
-            </button>
+            <div>
+              <button onClick={() => handleMoreInfo(recipe.idMeal)}>
+                More Info
+              </button>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
     </div>
   );
 }
