@@ -1,16 +1,17 @@
-Build a React app where users can browse recipes from Our Recipe API and save their favorite meals. Users will register or log in, see a list of recipes, and favorite the ones they like. Users can also view and manage their saved favorites.
+React app where users can browse recipes from a third-party API and save their favorite meals. Users will register or log in, see a list of recipes, and favorite the ones they like. Users can also view and manage their saved favorites.
 
 API Docs:
 
 https://fsa-recipe.up.railway.appLinks to an external site.
 
 
-Functionality Requirements
-Routes via React Router (These routes may be named as you wish.)
-/recipe - this could be the home page; this component should show at least 20 recipes
-/recipe/:id  - this component should display details of an individual recipe including the steps to make it
-/login and /register - for the user to authenticate using a React Form with a username and password
-/favorites  - show all of the favorited recipes for the authenticated user. This route should only appear if you are authenticated  
+Functionality: 
+
+Routes via React Router
+/recipe - Home page; this component shows at least 20 recipes
+/recipe/:id  - this component displays details of an individual recipe including the steps to make it
+/login and /register - React forms for the user to register, authenticate with a username and password
+/favorites  - shows all of the favorited recipes for the authenticated user. This route only appears if you are authenticated  
 
 Unauthenticated Users should be able to:
 Observe a list of all the recipes
